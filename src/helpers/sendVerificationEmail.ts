@@ -10,12 +10,24 @@ export async function sendVerificationEmail(
     try {
         const resend = getResendClient();
 
-        await resend.emails.send({
-            from: "onboarding@resend.dev",
+        const { error } = await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
             to: email,
             subject: "Verify your MstryMessage account",
             react: VerificationEmail({ username, otp: verifyCode }),
         });
+
+        if (error) {
+            console.error(
+                "Resend rejected verification email:",
+                JSON.stringify(error, Object.getOwnPropertyNames(error))
+            );
+            return {
+                success: false,
+                message: "Verification email could not be sent. Check the email address or Resend configuration.",
+            };
+        }
+
         return {
             success: true,
             message: "Verification email sent successfully.",

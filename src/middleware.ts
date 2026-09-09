@@ -1,28 +1,23 @@
-import {NextRequest,NextResponse} from "next/server";
-
-export {default} from "next-auth/middleware";
-import {getToken} from "next-auth/jwt";
+import { getToken } from "next-auth/jwt";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request:NextRequest){
 
     const token=await getToken({req:request})
     const url=request.nextUrl
 
-    if (url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up")) {
+    if (
+        url.pathname.startsWith("/sign-in") ||
+        url.pathname.startsWith("/sign-up") ||
+        url.pathname.startsWith("/verify")
+    ) {
         return NextResponse.next()
     }
 
-    if(token && 
-        (
-            url.pathname.startsWith("/sign-in") ||
-            url.pathname.startsWith("/sign-up") ||
-            url.pathname.startsWith("/verify") ||
-            url.pathname.startsWith("/") 
-
-        )
-    ) {
-        return NextResponse.redirect(new URL("/dashboard",request.url))
+    if (token) {
+        return NextResponse.next()
     }
+
     return NextResponse.redirect(new URL("/sign-in",request.url))
 }
 

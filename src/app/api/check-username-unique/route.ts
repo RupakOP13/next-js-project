@@ -8,8 +8,6 @@ const UsernameQuerySchema=z.object({
 })
 
 export async function GET(request:Request){
-    await dbConnect();
-
     try{
       const {searchParams} = new URL(request.url);
       const queryParam = {
@@ -24,6 +22,8 @@ export async function GET(request:Request){
           {status:400}
         );
       }
+
+      await dbConnect();
 
       const {username} = result.data;
       const existingVerifiedUser = await UserModel.findOne({username, isVerified:true});
@@ -41,6 +41,9 @@ export async function GET(request:Request){
       }, {status:200});
     } catch(error) {
       console.error("Error checking username uniqueness:", error);
-      return new Response(JSON.stringify({success:false, message:"Internal server error"}), {status:500});
+      return Response.json(
+        {success:false, message:"Username service is temporarily unavailable"},
+        {status:503}
+      );
     }
 }

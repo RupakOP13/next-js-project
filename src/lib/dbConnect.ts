@@ -12,8 +12,17 @@ async function dbConnect():Promise<void>{
         return;
     }
 
+    const uri = process.env.MONGODB_URI;
+
+    if (!uri) {
+        throw new Error('MONGODB_URI is not defined in the environment');
+    }
+
     try{
-       const db= await mongoose.connect(process.env.MONGODB_URI || '',{});
+       const db= await mongoose.connect(uri,{
+           serverSelectionTimeoutMS:5000,
+           connectTimeoutMS:5000,
+       });
        connection.isConnected=db.connections[0].readyState;
        console.log("DB connected");
     }
